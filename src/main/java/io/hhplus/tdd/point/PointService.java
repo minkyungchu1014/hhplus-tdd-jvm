@@ -3,15 +3,17 @@ package io.hhplus.tdd.point;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 @Service
 public class PointService {
 
+    private static final Logger log = LoggerFactory.getLogger(PointService.class);
     private final UserPointTable userPointTable;
     private final PointHistoryTable pointHistoryTable;
     private final ConcurrentHashMap<Long, ReentrantLock> perUserLocks = new ConcurrentHashMap<>();
@@ -37,6 +39,9 @@ public class PointService {
             UserPoint updatedUserPoint = userPointTable.insertOrUpdate(userId, newAmount);
             pointHistoryTable.insert(userId, amount, TransactionType.CHARGE, System.currentTimeMillis());
             return updatedUserPoint;
+        } catch (Exception e){
+            log.error("{}:{}", userId, e.getMessage());
+            throw e;
         } finally {
             lock.unlock();
         }
@@ -53,6 +58,9 @@ public class PointService {
             UserPoint updatedUserPoint = userPointTable.insertOrUpdate(userId, userPoint.point() - amount);
             pointHistoryTable.insert(userId, amount, TransactionType.USE, System.currentTimeMillis());
             return updatedUserPoint;
+        } catch (Exception e){
+            log.error("{}:{}", userId, e.getMessage());
+            throw e;
         } finally {
             lock.unlock();
         }

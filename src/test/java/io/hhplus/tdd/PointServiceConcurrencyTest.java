@@ -14,7 +14,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -80,7 +79,7 @@ class PointServiceConcurrencyTest {
         int numberOfThreads = 3;
         long chargeAmount = 200L;
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
-        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads * 2);
 
         List<Long> users = List.of(1L, 2L, 3L);
 
