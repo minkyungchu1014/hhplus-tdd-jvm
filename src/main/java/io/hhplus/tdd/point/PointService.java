@@ -5,6 +5,7 @@ import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -13,14 +14,19 @@ public class PointService {
 
     private final UserPointTable userPointTable;
     private final PointHistoryTable pointHistoryTable;
-    private final Lock lock = new ReentrantLock();
+    private final ConcurrentHashMap<Long, ReentrantLock> perUserLocks = new ConcurrentHashMap<>();
 
     public PointService(UserPointTable userPointTable, PointHistoryTable pointHistoryTable) {
         this.userPointTable = userPointTable;
         this.pointHistoryTable = pointHistoryTable;
     }
 
+    private Lock getLockForUser(long userId) {
+        return perUserLocks.computeIfAbsent(userId, id -> new ReentrantLock());
+    }
+
     public UserPoint chargePoints(long userId, long amount) {
+        Lock lock = getLockForUser(userId);
         lock.lock();
         try {
             UserPoint userPoint = userPointTable.selectById(userId);
@@ -37,6 +43,7 @@ public class PointService {
     }
 
     public UserPoint usePoints(long userId, long amount) {
+        Lock lock = getLockForUser(userId);
         lock.lock();
         try {
             UserPoint userPoint = userPointTable.selectById(userId);
