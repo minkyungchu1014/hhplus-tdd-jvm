@@ -23,6 +23,8 @@ public UserPoint chargePoints(long userId, long amount) {
 - 여러 스레드가 동시에 메소드를 호출하면서 충전/사용 과정에서 다른 스레드의 업데이트가 덮어씌워지는 문제가 발생함
 - 데이터의 일관성이 깨지며, 결과적으로 계산이 이상하게됨.
 
+
+
 ## 2. 해결 방법
 1. 1차 시도 : synchronized 키워드 사용
 
@@ -70,7 +72,7 @@ public UserPoint chargePoints(long userId, long amount) {
 
 3. 3차 시도 : ConcurrentHashMap과 ReentrantLock을 사용한 ID별 동시성 제어
 ### 해결 코드
-```angular2html
+```
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -102,6 +104,7 @@ public UserPoint chargePoints(long userId, long amount) {
   
 ### 문제점
 - 락을 걸어야할 객체가 많아지면 메모리 사용량이 증가될 것으로 보임
+
 
 
 ## 3. 최종 분석 및 결론
